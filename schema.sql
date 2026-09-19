@@ -1,0 +1,34 @@
+CREATE TABLE IF NOT EXISTS schools (
+  id BIGSERIAL PRIMARY KEY,
+  code VARCHAR(80) NOT NULL UNIQUE,
+  name VARCHAR(255) NOT NULL,
+  username VARCHAR(120) NOT NULL UNIQUE,
+  password_hash VARCHAR(255) NOT NULL,
+  active BOOLEAN NOT NULL DEFAULT TRUE,
+  expiry_date DATE NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS school_data (
+  school_id BIGINT NOT NULL REFERENCES schools(id) ON DELETE CASCADE,
+  store_name VARCHAR(80) NOT NULL,
+  data_json TEXT NOT NULL,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (school_id, store_name)
+);
+
+CREATE TABLE IF NOT EXISTS school_deletions (
+  school_id BIGINT NOT NULL REFERENCES schools(id) ON DELETE CASCADE,
+  deletion_key VARCHAR(180) NOT NULL,
+  deleted_at TIMESTAMP NOT NULL,
+  PRIMARY KEY (school_id, deletion_key)
+);
+
+CREATE TABLE IF NOT EXISTS activity_log (
+  id BIGSERIAL PRIMARY KEY,
+  school_id BIGINT NOT NULL REFERENCES schools(id) ON DELETE CASCADE,
+  row_json TEXT NOT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX IF NOT EXISTS idx_activity_school_created ON activity_log (school_id, created_at);
